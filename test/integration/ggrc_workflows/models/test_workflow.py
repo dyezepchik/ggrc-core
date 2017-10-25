@@ -242,13 +242,18 @@ class TestWorkflow(TestCase):
       self.assertEqual(all_models.Workflow.INACTIVE, workflow.status)
 
   @ddt.data(
-      ('One time workflow', None, None),
-      ('Daily workflow', all_models.Workflow.DAY_UNIT, 1),
-      ('Weekly workflow', all_models.Workflow.WEEK_UNIT, 1),
-      ('Monthly workflow', all_models.Workflow.MONTH_UNIT, 1),
+      ('One time workflow', None, None, True),
+      ('Daily workflow', all_models.Workflow.DAY_UNIT, 1, True),
+      ('Weekly workflow', all_models.Workflow.WEEK_UNIT, 1, True),
+      ('Monthly workflow', all_models.Workflow.MONTH_UNIT, 1, True),
+      ('One time workflow', None, None, False),
+      ('Daily workflow', all_models.Workflow.DAY_UNIT, 1, False),
+      ('Weekly workflow', all_models.Workflow.WEEK_UNIT, 1, False),
+      ('Monthly workflow', all_models.Workflow.MONTH_UNIT, 1, False),
   )
   @ddt.unpack  # pylint: disable=invalid-name
-  def test_change_verification_flag_positive(self, title, unit, repeat_every):
+  def test_change_verification_flag_negative(self, title, unit,
+                                             repeat_every, activate):
     with freezegun.freeze_time("2017-08-10"):
       with glob_factories.single_commit():
         workflow = factories.WorkflowFactory(title=title, unit=unit,
@@ -261,38 +266,8 @@ class TestWorkflow(TestCase):
             start_date=datetime.date(2017, 8, 3),
             end_date=datetime.date(2017, 8, 7))
       wf_id = workflow.id
-      workflow = all_models.Workflow.query.get(wf_id)
-      verif_default = all_models.Workflow.IS_VERIFICATION_NEEDED_DEFAULT
-      self.assertIs(workflow.is_verification_needed, verif_default)
-      self.generator.modify_object(
-          workflow,
-          {
-              'is_verification_needed': not verif_default
-          })
-      workflow = all_models.Workflow.query.get(wf_id)
-      self.assertIs(workflow.is_verification_needed, not verif_default)
-
-  @ddt.data(
-      ('One time workflow', None, None),
-      ('Daily workflow', all_models.Workflow.DAY_UNIT, 1),
-      ('Weekly workflow', all_models.Workflow.WEEK_UNIT, 1),
-      ('Monthly workflow', all_models.Workflow.MONTH_UNIT, 1),
-  )
-  @ddt.unpack  # pylint: disable=invalid-name
-  def test_change_verification_flag_negative(self, title, unit, repeat_every):
-    with freezegun.freeze_time("2017-08-10"):
-      with glob_factories.single_commit():
-        workflow = factories.WorkflowFactory(title=title, unit=unit,
-                                             repeat_every=repeat_every)
-        factories.TaskGroupTaskFactory(
-            task_group=factories.TaskGroupFactory(
-                workflow=workflow,
-                context=glob_factories.ContextFactory()
-            ),
-            start_date=datetime.date(2017, 8, 3),
-            end_date=datetime.date(2017, 8, 7))
-      wf_id = workflow.id
-      self.generator.activate_workflow(workflow)
+      if activate:
+        self.generator.activate_workflow(workflow)
       workflow = all_models.Workflow.query.get(wf_id)
       verif_default = all_models.Workflow.IS_VERIFICATION_NEEDED_DEFAULT
       self.assertIs(workflow.is_verification_needed, verif_default)

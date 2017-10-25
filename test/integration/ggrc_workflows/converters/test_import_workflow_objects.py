@@ -180,71 +180,38 @@ class TestWorkflowObjectsImport(TestCase):
     self.assertEqual(len(tasks), len(task_slugs))
 
   @ddt.data(
-      (True, 'True'),
-      (True, 'true'),
-      (True, 'TRUE'),
-      (False, 'False'),
-      (False, 'false'),
-      (False, 'FALSE'),
-  )
-  @ddt.unpack
-  def test_import_verification_flag(self, flag, import_value):
-    """Create wf with need verification flag."""
-    person = factories.PersonFactory(email="test@email.py")
-    slug = "SomeCode"
-    resp = self.import_data(collections.OrderedDict([
-        ("object_type", "Workflow"),
-        ("code", slug),
-        ("title", "SomeTitle"),
-        ("Need Verification", import_value),
-        ("force real-time email updates", "no"),
-        ("Manager", person.email),
-    ]))
-    self.assertEqual(1, resp[0]['created'])
-    workflow = Workflow.query.filter(Workflow.slug == slug).first()
-    self.assertEqual(flag, workflow.is_verification_needed)
-
-  @ddt.data(
-      ('FALSE', False),
-      ('False', False),
-      ('false', False),
-      ('TRUE', True),
-      ('True', True),
-      ('true', True),
+      ('WORKFLOW_VERIF', True),
+      ('WORKFLOW_NO_VERIF', False),
   )
   @ddt.unpack  # pylint: disable=invalid-name
-  def test_update_verification_flag_positive(self, import_value,
-                                             expected_value):
-    workflow_test_data = {
-        'WORKFLOW_VERIF': True,
-        'WORKFLOW_NO_VERIF': False
-    }
+  def test_update_verification_flag_positive(self, slug, value):
+    """Test verification flag could not be changed in a draft workflow
+    """
     with freezegun.freeze_time("2017-08-10"):
-      for slug, db_value in workflow_test_data.iteritems():
-        with factories.single_commit():
-          workflow = wf_factories.WorkflowFactory(
-              slug=slug, is_verification_needed=db_value)
-          wf_factories.TaskGroupTaskFactory(
-              task_group=wf_factories.TaskGroupFactory(
-                  workflow=workflow,
-                  context=factories.ContextFactory()
-              ),
-              start_date=date(2017, 8, 3),
-              end_date=date(2017, 8, 7))
-          person = factories.PersonFactory(email="{}@email.py".format(slug))
-        wf_id = workflow.id
-        self.assertEqual(workflow.status, workflow.DRAFT)
-        resp = self.import_data(collections.OrderedDict([
-            ("object_type", "Workflow"),
-            ("code", slug),
-            ("title", "SomeTitle"),
-            ("Need Verification", import_value),
-            ("force real-time email updates", "no"),
-            ("Manager", person.email),
-        ]))
-        self.assertEqual(1, resp[0]['updated'])
-        workflow = Workflow.query.filter(Workflow.id == wf_id).first()
-        self.assertEqual(workflow.is_verification_needed, expected_value)
+      with factories.single_commit():
+        workflow = wf_factories.WorkflowFactory(
+            slug=slug, is_verification_needed=value)
+        wf_factories.TaskGroupTaskFactory(
+            task_group=wf_factories.TaskGroupFactory(
+                workflow=workflow,
+                context=factories.ContextFactory()
+            ),
+            start_date=date(2017, 8, 3),
+            end_date=date(2017, 8, 7))
+        person = factories.PersonFactory(email="{}@email.py".format(slug))
+      wf_id = workflow.id
+      self.assertEqual(workflow.status, workflow.DRAFT)
+      resp = self.import_data(collections.OrderedDict([
+          ("object_type", "Workflow"),
+          ("code", slug),
+          ("title", "SomeTitle"),
+          ("Need Verification", not value),
+          ("force real-time email updates", "no"),
+          ("Manager", person.email),
+      ]))
+      self.assertEqual(1, resp[0]['ignored'])
+      workflow = Workflow.query.filter(Workflow.id == wf_id).first()
+      self.assertEqual(workflow.is_verification_needed, value)
 
   @ddt.data(
       (True, 'FALSE'),
@@ -256,6 +223,9 @@ class TestWorkflowObjectsImport(TestCase):
   )
   @ddt.unpack  # pylint: disable=invalid-name
   def test_update_verification_flag_negative(self, db_value, import_value):
+    """Test verification flag could not be changed in an activated workflow
+    with all finished cycles
+    """
     slug = 'SomeCode'
     with freezegun.freeze_time("2017-08-10"):
       with factories.single_commit():

@@ -225,14 +225,14 @@ class TestWorkflowsApiPost(TestCase):
 
   @ddt.data(True, False)
   def test_change_verification_flag_positive(self, flag):  # noqa pylint: disable=invalid-name
-    """is_verification_needed flag is changeable for DRAFT workflow."""
+    """is_verification_needed flag is not changeable for DRAFT workflow."""
     with factories.single_commit():
       workflow = wf_factories.WorkflowFactory(is_verification_needed=flag)
     self.assertEqual(workflow.status, all_models.Workflow.DRAFT)
     workflow_id = workflow.id
     resp = self.api.put(workflow, {"is_verification_needed": not flag})
-    self.assert200(resp)
-    self.assertEqual(
+    self.assert400(resp)
+    self.assertNotEqual(
         all_models.Workflow.query.get(workflow_id).is_verification_needed,
         not flag)
 
