@@ -225,16 +225,16 @@ class Workflow(mixins.CustomAttributable, HasOwnContext, mixins.Timeboxed,
     """Validate is_verification_needed field for Workflow.
 
     It's not allowed to change is_verification_needed flag after creation.
-    If is_verification_needed doesn't send,
-    then is_verification_needed flag is True.
+    If is_verification_needed flag not sent, it is set to True.
     """
     if self.is_verification_needed is None:
       return self.IS_VERIFICATION_NEEDED_DEFAULT if value is None else value
     if value is None:
       return self.is_verification_needed
-    if self.status != self.DRAFT and value != self.is_verification_needed:
-      raise ValueError("is_verification_needed value isn't changeble "
-                       "on workflow with '{}' status".format(self.status))
+    # ever after creation changing of this flag is prohibited
+    if value != self.is_verification_needed:
+      raise ValueError("is_verification_needed value isn't changeable "
+                       "on a workflow with '{}' status".format(self.status))
     return value
 
   @builder.simple_property
