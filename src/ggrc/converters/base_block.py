@@ -568,6 +568,8 @@ class BlockConverter(object):
     for row_converter in self.row_converters:
       obj = row_converter.obj
       try:
+        if row_converter.do_not_expunge:
+          continue
         if row_converter.ignore and obj in db.session:
           db.session.expunge(obj)
       except UnmappedInstanceError:
@@ -652,11 +654,16 @@ class BlockConverter(object):
                 ignore_lines=", ".join(str_indexes[1:]),
             )
         )
+        if key == "slug":  # mark obj not to be expunged from the session
+          for index in indexes:
+            offset_index = index - 3 - self.offset
+            if self.in_range(offset_index, remove_offset=False):
+              self.row_converters[offset_index].set_do_not_expunge()
 
-      for offset_index in indexes[1:]:
-        index = offset_index - 3 - self.offset
-        if self.in_range(index, remove_offset=False):
-          self.row_converters[index].set_ignore()
+      for index in indexes[1:]:
+        offset_index = index - 3 - self.offset
+        if self.in_range(offset_index, remove_offset=False):
+          self.row_converters[offset_index].set_ignore()
 
   @staticmethod
   def _sanitize_header(header):

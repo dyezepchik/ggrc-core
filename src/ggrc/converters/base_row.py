@@ -28,6 +28,7 @@ class RowConverter(object):
     self.is_new = True
     self.is_delete = False
     self.is_deprecated = False
+    self.do_not_expunge = False
     self.ignore = False
     self.index = options.get("index", -1)
     self.row = options.get("row", [])
@@ -128,6 +129,14 @@ class RowConverter(object):
 
   def set_ignore(self, ignore=True):
     self.ignore = ignore
+
+  def set_do_not_expunge(self, do_not_expunge=True):
+    """Mark an ignored object not to be expunged from a session
+
+    We may not expunge objects with duplicate slugs, because they represent
+    the same object.
+    """
+    self.do_not_expunge = do_not_expunge
 
   def get_or_generate_object(self, attr_name):
     """Fetch an existing object if possible or create and return a new one.
