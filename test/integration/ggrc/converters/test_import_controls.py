@@ -64,3 +64,41 @@ class TestControlsImport(TestCase):
     self.assertEqual(1, resp[0]["updated"])
     self.assertEqual(control.status, control.DEPRECATED)
     self.assertIsNotNone(control.end_date)
+
+  def test_import_control_duplicate_slugs(self):
+    """Test import does not fail when two objects with the same slug are
+    imported."""
+    with factories.single_commit():
+      role_name = factories.AccessControlRoleFactory(
+          object_type="Control").name
+      emails = [factories.PersonFactory().email for _ in range(2)]
+
+    control = factories.ControlFactory()
+    self.import_data(collections.OrderedDict([
+        ("object_type", "Control"),
+        ("code", control.slug),
+        ("title", "Title"),
+        ("Admin", "user@example.com"),
+        (role_name, "\n".join(emails)),
+    ]))
+
+    import_dicts = [
+        collections.OrderedDict([
+            ("object_type", "Control"),
+            ("code", control.slug),
+            ("title", "Title"),
+            ("Admin", "user@example.com"),
+            (role_name, "\n".join(emails)),
+        ]),
+        collections.OrderedDict([
+            ("object_type", "Control"),
+            ("code", control.slug),
+            ("title", "Title"),
+            ("Admin", "user@example.com"),
+            (role_name, "\n".join(emails)),
+        ]),
+    ]
+    response = self.import_data(*import_dicts)
+    fail_response = {u'message': u'Import failed due to server error.',
+                     u'code': 400}
+    self.assertNotEqual(response, fail_response)
