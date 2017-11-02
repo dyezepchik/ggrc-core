@@ -172,7 +172,7 @@ class RowConverter(object):
       self.add_error(errors.PERMISSION_ERROR)
     return obj
 
-  def setup_secondary_objects(self, slugs_dict):
+  def setup_secondary_objects(self):
     """Import secondary objects.
 
     This function creates and stores all secondary object such as relationships

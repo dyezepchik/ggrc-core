@@ -172,7 +172,7 @@ class Converter(object):
 
   def import_secondary_objects(self):
     for converter in self.block_converters:
-      converter.import_secondary_objects(self.new_objects)
+      converter.import_secondary_objects()
 
   def get_info(self):
     for converter in self.block_converters:

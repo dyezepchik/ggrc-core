@@ -87,7 +87,7 @@ class BlockConverter(object):
     shared_state = self.converter.shared_state
     if classes not in shared_state:
       shared_state[classes] = defaultdict(
-          lambda: structures.CaseInsensitiveDefaultDict(list)
+          lambda: structures.CaseInsensitiveDefaultDict(set)
       )
     return shared_state[classes]
 
@@ -103,7 +103,7 @@ class BlockConverter(object):
     self._user_roles_cache = None
     self._ca_definitions_cache = None
     self.converter = converter
-    self.offset = options.get("offset", 0)
+    self.offset = options.get("offset", 0)  # offset to the current block
     self.object_class = options.get("object_class")
     self.rows = options.get("rows", [])
     self.operation = 'import' if self.rows else 'export'
@@ -463,7 +463,7 @@ class BlockConverter(object):
     for row_converter in self.row_converters:
       row_converter.check_mandatory_fields()
 
-  def check_unique_columns(self, counts=None):
+  def check_unique_columns(self):
     self.generate_unique_counts()
     for key, counts in self.unique_counts.items():
       self.remove_duplicate_keys(key, counts)
@@ -503,10 +503,10 @@ class BlockConverter(object):
 
     return info
 
-  def import_secondary_objects(self, slugs_dict):
+  def import_secondary_objects(self):
     """Import secondary objects procedure."""
     for row_converter in self.row_converters:
-      row_converter.setup_secondary_objects(slugs_dict)
+      row_converter.setup_secondary_objects()
 
     if not self.converter.dry_run:
       for row_converter in self.row_converters:
@@ -624,13 +624,13 @@ class BlockConverter(object):
 
   def generate_unique_counts(self):
     """Populate unique_counts for sent data."""
-    for key, header in self.object_headers.items():
+    for key, header in self.headers.items():
       if not header["unique"]:
         continue
       for index, row in enumerate(self.row_converters):
         value = row.get_value(key)
         if value:
-          self.unique_counts[key][value].append(index + self.offset + 3)
+          self.unique_counts[key][value].add(index + self.offset + 3)
 
   def in_range(self, index, remove_offset=True):
     if remove_offset:
@@ -643,6 +643,7 @@ class BlockConverter(object):
       if not any(self.in_range(index) for index in indexes):
         continue  # ignore duplicates in other related code blocks
 
+      indexes = sorted(list(indexes))
       if len(indexes) > 1:
         str_indexes = [str(index) for index in indexes]
         self.row_errors.append(
