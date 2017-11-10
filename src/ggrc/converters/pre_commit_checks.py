@@ -3,7 +3,9 @@
 
 """Checker function for import pre commit hooks."""
 
+from collections import OrderedDict
 from ggrc.converters import errors
+from ggrc_basic_permissions.models import UserRole
 
 
 def check_tasks(row_converter):
@@ -144,11 +146,78 @@ def check_assessment_status(row_converter):
     )
 
 
+def check_program_roles(row_converter):
+  """Checks for one person to have a single program role after the import.
+
+  For this to happen, pull all people for empty imported values. Since
+  these values are not going to be deleted, duplicate people might appear
+  after import is finished. Roles could be raised by import but can not be
+  lowered.
+  E.g.:
+              prg_owner    prg_editor    prg_reader
+    was:        user1        user2         user3
+    importing:  user4        user3
+
+    After the import user3 should obtain prg_editor role, prg_reader should
+    be deleted
+
+              prg_owner    prg_editor    prg_reader
+    was:        user1        user2         user3
+    importing:  user4                      user2
+
+    After the import user2, user3 remain as they were
+
+  Args:
+    row_converter: RowConverter object with row data for Program
+  """
+  roles_lo_to_hi = OrderedDict([('program_reader', 'ProgramReader'),
+                                ('program_editor', 'ProgramEditor'),
+                                ('program_owner', 'ProgramOwner')])
+  roles_index = row_converter.object_roles.copy()  # {'program_editor': user1}
+  reverse_roles_index = {}  # {user1: 'program_editor':}
+
+  # complete role index with roles not being imported
+  for role_attr, role_name in roles_lo_to_hi.items():
+    role = row_converter.block_converter.get_role(role_name)
+    user_roles = UserRole.query.filter_by(
+        role=role,
+        context_id=row_converter.obj.context_id
+    )
+    roles_index[role_attr].update([ur.person for ur in user_roles])
+
+  # replace roles for users with the higher ones(going from low to high role)
+  for role_attr, role_name in roles_lo_to_hi.items():
+    for user in roles_index[role_attr]:
+      if user in reverse_roles_index:
+        # conflict found! Add warning, replace with a higher role
+        row_converter.add_warning(errors.DUPLICATE_PERSON_FOR_OBJECT_ROLES,
+                                  person=user.email)
+        # mark this UserRole for deletion under the conflicting column handler
+        col_handler = row_converter.objects.get(role_attr)
+        if col_handler:
+          col_handler.delete_user_roles.append(
+              (roles_lo_to_hi[reverse_roles_index[user]], user)
+          )
+      reverse_roles_index[user] = role_attr
+
+  # get back from inverted index to forward index
+  row_converter.object_roles.clear()
+  for user, role in reverse_roles_index.items():
+    row_converter.object_roles[role].add(user)
+
+  # assign clean values to column handlers
+  for role_attr in roles_lo_to_hi.keys():
+    if role_attr in row_converter.objects:
+      people = row_converter.object_roles.get(role_attr)
+      row_converter.objects[role_attr].value = list(people) if people else None
+
+
 CHECKS = {
     "TaskGroupTask": check_tasks,
     "CycleTaskGroupObjectTask": check_cycle_tasks,
     "Workflow": check_workflows,
-    "Assessment": check_assessment
+    "Assessment": check_assessment,
+    "Program": check_program_roles,
 }
 
 SECONDARY_CHECKS = {

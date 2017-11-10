@@ -20,6 +20,11 @@ class ObjectRoleColumnHandler(UserColumnHandler):
   role = -1
   owner_columns = ("program_owner")
 
+  def __init__(self, row_converter, key, **options):
+    self.delete_user_roles = []
+    super(ObjectRoleColumnHandler, self).__init__(
+        row_converter, key, **options)
+
   def parse_item(self):
     """Parse new line separated list of emails
 
@@ -34,7 +39,8 @@ class ObjectRoleColumnHandler(UserColumnHandler):
     if self.row_converter.is_new and self.mandatory and not users:
       self.add_error(errors.MISSING_VALUE_ERROR,
                      column_name=self.display_name)
-    return list(users)
+    self.row_converter.object_roles[self.key].update(users)
+    return users
 
   def set_obj_attr(self):
     pass
@@ -45,15 +51,29 @@ class ObjectRoleColumnHandler(UserColumnHandler):
     return "\n".join(cache[self.row_converter.obj.context_id][self.role.id])
 
   def remove_current_roles(self):
+    """Remove people under current role to replace with the imported ones."""
     UserRole.query.filter_by(
         role=self.role,
         context_id=self.row_converter.obj.context_id)\
         .delete(synchronize_session='fetch')
 
+  def remove_conflicting_roles(self):
+    """Remove people with other roles in case roles to the same person are
+    conflicting.
+    """
+    for role_name, user in self.delete_user_roles:
+      role = self.row_converter.block_converter.get_role(role_name)
+      UserRole.query.filter_by(
+          role=role,
+          person=user,
+          context_id=self.row_converter.obj.context_id)\
+          .delete(synchronize_session='fetch')
+
   def insert_object(self):
     if self.dry_run or not self.value:
       return
     self.remove_current_roles()
+    self.remove_conflicting_roles()
     for owner in self.value:
       user_role = UserRole(
           role=self.role,
@@ -65,6 +85,8 @@ class ObjectRoleColumnHandler(UserColumnHandler):
 
 
 class ProgramOwnerColumnHandler(ObjectRoleColumnHandler):
+  """Program Owner User role handler.
+  """
 
   def __init__(self, row_converter, key, **options):
     self.role = row_converter.block_converter.get_role("ProgramOwner")
@@ -73,6 +95,8 @@ class ProgramOwnerColumnHandler(ObjectRoleColumnHandler):
 
 
 class ProgramEditorColumnHandler(ObjectRoleColumnHandler):
+  """Program Editor User role handler.
+  """
 
   def __init__(self, row_converter, key, **options):
     self.role = row_converter.block_converter.get_role("ProgramEditor")
@@ -81,6 +105,8 @@ class ProgramEditorColumnHandler(ObjectRoleColumnHandler):
 
 
 class ProgramReaderColumnHandler(ObjectRoleColumnHandler):
+  """Program Reader User role handler.
+  """
 
   def __init__(self, row_converter, key, **options):
     self.role = row_converter.block_converter.get_role("ProgramReader")

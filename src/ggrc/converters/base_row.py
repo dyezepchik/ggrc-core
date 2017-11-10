@@ -38,6 +38,7 @@ class RowConverter(object):
     self.line = self.index + self.block_converter.offset +\
         self.block_converter.BLOCK_OFFSET
     self.headers = options.get("headers", [])
+    self.object_roles = collections.defaultdict(set)
     self.old_values = {}
 
   def add_error(self, template, **kwargs):

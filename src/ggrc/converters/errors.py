@@ -146,3 +146,7 @@ SINGLE_AUDIT_RESTRICTION = (u"Line {line}: You can not map {mapped_type} to "
 UNMAP_AUDIT_RESTRICTION = (u"Line {line}: You can not unmap {mapped_type} "
                            u"from {object_type} because this {object_type} is "
                            u"mapped to an {mapped_type}-scope object.")
+
+DUPLICATE_PERSON_FOR_OBJECT_ROLES = (
+    u"Line {line}: Several Object roles selected for the same person "
+    u"{person}. The role with the higher privileges would be assigned.")
