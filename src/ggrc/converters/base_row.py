@@ -35,8 +35,8 @@ class RowConverter(object):
     self.attrs = collections.OrderedDict()
     self.objects = collections.OrderedDict()
     self.id_key = ""
-    offset = 3  # 2 header rows and 1 for 0 based index
-    self.line = self.index + self.block_converter.offset + offset
+    self.line = self.index + self.block_converter.offset +\
+        self.block_converter.BLOCK_OFFSET
     self.headers = options.get("headers", [])
 
   def add_error(self, template, **kwargs):

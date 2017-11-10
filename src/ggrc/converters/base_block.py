@@ -47,9 +47,11 @@ CACHE_EXPIRY_IMPORT = 600
 
 class BlockConverter(object):
   # pylint: disable=too-many-public-methods
-
   """ Main block converter class for dealing with csv files and data
 
+  Constants:
+    BLOCK_OFFSET: offset from the block beginning to the first block line
+                  2 header rows and 1 for 0 based index
   Attributes:
     attr_index (dict): reverse index for getting attribute name from
       display_name
@@ -75,6 +77,8 @@ class BlockConverter(object):
             "valid_values": "list of valid values"
 
   """
+
+  BLOCK_OFFSET = 3
 
   def get_unique_counts_dict(self, object_class):
     """ get a the varible for storing unique counts
@@ -627,15 +631,29 @@ class BlockConverter(object):
     for key, header in self.headers.items():
       if not header["unique"]:
         continue
-      for index, row in enumerate(self.row_converters):
+      for rel_index, row in enumerate(self.row_converters):
         value = row.get_value(key)
         if value:
-          self.unique_counts[key][value].add(index + self.offset + 3)
+          self.unique_counts[key][value].add(self.calc_abs_index(rel_index))
 
   def in_range(self, index, remove_offset=True):
+    """Checks if the value provided lays within the range of lines of the
+    current block
+    """
     if remove_offset:
-      index -= 3 + self.offset
+      index = self.calc_offset(index)
     return index >= 0 and index < len(self.row_converters)
+
+  def calc_offset(self, index):
+    """Calculate an offset relative to the current block beginning
+    given an absolute line index
+    """
+    return index - self.BLOCK_OFFSET - self.offset
+
+  def calc_abs_index(self, rel_index):
+    """Calculate an absolute line number given a relative index
+    """
+    return rel_index + self.BLOCK_OFFSET + self.offset
 
   def remove_duplicate_keys(self, key, counts):
 
@@ -657,12 +675,12 @@ class BlockConverter(object):
         )
         if key == "slug":  # mark obj not to be expunged from the session
           for index in indexes:
-            offset_index = index - 3 - self.offset
+            offset_index = self.calc_offset(index)
             if self.in_range(offset_index, remove_offset=False):
               self.row_converters[offset_index].set_do_not_expunge()
 
       for index in indexes[1:]:
-        offset_index = index - 3 - self.offset
+        offset_index = self.calc_offset(index)
         if self.in_range(offset_index, remove_offset=False):
           self.row_converters[offset_index].set_ignore()
 
