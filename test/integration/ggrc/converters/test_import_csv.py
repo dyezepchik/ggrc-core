@@ -192,11 +192,48 @@ class TestBasicCsvImport(TestCase):
 
   def test_duplicate_people(self):
     """Test adding two of the same object people objects in the same row."""
+    factories.PersonFactory(email="user2@example.com", name="user2")
     filename = "duplicate_object_person.csv"
     response = self.import_file(filename)[0]
+    expected_errors = {
+        errors.DUPLICATE_PERSON_FOR_OBJECT_ROLES.format(
+            line="3", person="user2@example.com"),
+        errors.DUPLICATE_PERSON_FOR_OBJECT_ROLES.format(
+            line="4", person="user@example.com"),
+    }
+    response_errors = response["row_warnings"]
+    self.assertEqual(expected_errors, set(response_errors))
 
-    self.assertEqual(0, len(response["row_warnings"]))
-    self.assertEqual(0, len(response["row_errors"]))
+  def test_uniqueness_imported_program_roles(self):
+    """Test program roles are unique after import of duplicate roles"""
+    factories.PersonFactory(email="user2@example.com", name="user2")
+    program = factories.ProgramFactory(slug="p2")
+    p_id = program.id
+    response = self.import_data(OrderedDict([
+        ("object_type", "Program"),
+        ("Code*", "p2"),
+        ("title", "p2"),
+        ("Reader", "user2@example.com"),
+    ]))
+    self._check_csv_response(response, {})
+
+    filename = "duplicate_object_person.csv"
+    response = self.import_file(filename)[0]
+    expected_errors = {
+        errors.DUPLICATE_PERSON_FOR_OBJECT_ROLES.format(
+            line="3", person="user2@example.com"),
+        errors.DUPLICATE_PERSON_FOR_OBJECT_ROLES.format(
+            line="4", person="user@example.com"),
+    }
+    response_errors = response["row_warnings"]
+    self.assertEqual(expected_errors, set(response_errors))
+    program = models.Program.query.get(p_id)
+    from ggrc_basic_permissions.models import UserRole
+    from ggrc.models.person import Person
+    persons = Person.query.join(UserRole).filter(
+        (UserRole.context_id == program.context_id)).all()
+    self.assertListEqual([p.email for p in persons],
+                         ["user@example.com", "user2@example.com"])
 
   def test_duplicate_people_objective(self):
     """Test duplicate error that causes request to fail."""

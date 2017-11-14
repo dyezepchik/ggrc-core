@@ -1,4 +1,4 @@
 Object type,,,,,,,,
-Program,Code*,Title*,No Access,Manager,map:person,editor,reader
-,p1,p 2,user@example.com,user@example.com,user@example.com,,
-,p2,p 1,user@example.com,user@example.com,user@example.com,,
+Program,Code*,Title*,No Access,Manager,editor,reader,map:person
+,p1,p 2,user@example.com,user2@example.com,,user2@example.com,user@example.com
+,p2,p 1,user@example.com,user@example.com,user@example.com,,user@example.com,,
