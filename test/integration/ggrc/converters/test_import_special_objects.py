@@ -18,7 +18,6 @@ class TestSpecialObjects(TestCase):
   def setUp(self):
     super(TestSpecialObjects, self).setUp()
     self.client.get("/login")
-    pass
 
   def tearDown(self):
     pass
@@ -41,7 +40,7 @@ class TestSpecialObjects(TestCase):
     self.assertEqual(2, Program.query.count())
     program = Program.query.filter(Program.slug == "prog-1").first()
     p1_roles = UserRole.query.filter_by(context_id=program.context_id).all()
-    self.assertEqual(4, len(p1_roles))
+    self.assertEqual(3, len(p1_roles))
     owner_ids = [r.person_id for r in p1_roles if r.role_id == 1]
     editor_ids = [r.person_id for r in p1_roles if r.role_id == 2]
     reader_ids = [r.person_id for r in p1_roles if r.role_id == 3]
@@ -52,7 +51,7 @@ class TestSpecialObjects(TestCase):
     reader_emails = [p.email for p in
                      Person.query.filter(Person.id.in_(reader_ids)).all()]
     expected_owners = set(["user1@example.com", "user11@example.com"])
-    expected_editors = set(["user11@example.com"])
+    expected_editors = set()
     expected_readers = set(["user12@example.com"])
     self.assertEqual(set(owner_emails), expected_owners)
     self.assertEqual(set(editor_emails), expected_editors)
