@@ -389,7 +389,7 @@ def init_hook():
   signals.Restful.model_put_after_commit.connect(
       _handle_audit_put_after_commit, sender=all_models.Audit)
 
-  signals.Restful.model_put_before_commit.connect(
+  signals.Restful.model_put_after_commit.connect(
       _handle_issuetracker, sender=all_models.Assessment)
 
   signals.Restful.model_deleted.connect(
