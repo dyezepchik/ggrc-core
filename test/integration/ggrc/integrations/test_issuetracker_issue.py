@@ -1,7 +1,9 @@
 # Copyright (C) 2018 Google Inc.
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 
-"""Integration test for Clonable mixin"""
+"""Integration tests for IssueTracker integration"""
+
+from collections import OrderedDict
 
 from mock import patch
 
@@ -31,6 +33,11 @@ class TestIssueTrackerIntegration(SnapshotterBaseTestCase):
     super(TestIssueTrackerIntegration, self).setUp()
 
     self.client.get("/login")
+    self.headers = {
+        'Content-Type': 'application/json',
+        "X-Requested-By": "GGRC",
+        "X-export-view": "blocks",
+    }
 
   # pylint: disable=unused-argument
   @patch('ggrc.integrations.issues.Client.update_issue')
@@ -80,6 +87,20 @@ class TestIssueTrackerIntegration(SnapshotterBaseTestCase):
                                              'type': None,
                                              'severity': u'S3'})
 
+  def test_update_issuetracker_info_on_asmt_import(self):
+    """Test issuetracker issue updated when comment for assessment imported"""
+    iti = factories.IssueTrackerIssueFactory()
+    asmt = iti.issue_tracked_obj
+    asmt_id = asmt.id
+    audit = asmt.audit
+    self.import_data(OrderedDict([
+      ("object_type", "Assessment"),
+      ("Code*", asmt.slug),
+      ("Audit", audit.slug),
+      ("Comments", "Some imported comment"),
+    ]), dry_run=False)
+    asmt = db.session.query(models.Assessment).get(asmt_id)
+    self.assertEqual(asmt.comments[0].description, "Some imported comment")
 
 @patch("ggrc.models.hooks.issue_tracker._is_issue_tracker_enabled",
        return_value=True)
