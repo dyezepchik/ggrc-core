@@ -127,7 +127,7 @@ class Audit(Snapshotable,
           "mandatory": False
       },
       "status": {
-          "display_name": "Status",
+          "display_name": "State",
           "mandatory": True,
           "description": "Options are:\n{}".format('\n'.join(VALID_STATES))
       }
