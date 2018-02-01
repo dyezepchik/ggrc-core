@@ -69,7 +69,7 @@ import Permission from '../permission';
         attr_name: 'slug',
         order: 3,
       }, {
-        attr_title: 'Status',
+        attr_title: 'State',
         attr_name: 'status',
         order: 4,
       }, {
