@@ -192,7 +192,7 @@ policy-2",contract-47,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,
 Object Type,,,,,,,,,,,,,,,,,,,,
-audit,Program,Title,Description,Audit Captains,Status,Planned Start Date,Planned End Date,Planned Report Period from,Planned Report Period to,Auditors,code,,,,,,,,,
+audit,Program,Title,Description,Audit Captains,State,Planned Start Date,Planned End Date,Planned Report Period from,Planned Report Period to,Auditors,code,,,,,,,,,
 ,prog-1,Audit 1,this is great,Urbon.S@example.com,PLANNED,5/25/2015,5/26/2015,5/27/2015,5/28/2015,"zidar@example.com
 Urbon.S@example.com",au-1,,,,,,,,,
 ,prog-2,Audit 2,this is great,zidar@example.com,PLANNED,5/26/2015,5/27/2015,5/28/2015,5/29/2015,"zidar@example.com

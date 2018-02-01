@@ -215,7 +215,7 @@ class TestBasicCsvImport(TestCase):
         ("Code*", "audit"),
         ("title", "audit"),
         ("Audit Captains", "user@example.com"),
-        ("status", "In Progress"),
+        ("state", "In Progress"),
         ("program", "P"),
     ]))
     self._check_csv_response(response, {})
@@ -229,7 +229,7 @@ class TestBasicCsvImport(TestCase):
         ("Code*", "audit"),
         ("title", "audit"),
         ("Audit Captains", "user@example.com"),
-        ("status", "In Progress"),
+        ("state", "In Progress"),
         ("program", "P"),
     ]))
     self._check_csv_response(response, {})

@@ -38,7 +38,7 @@ Dropdown, dropdown with mandatory attachments and comments, (a) value1, (a)(c) v
 ,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,,
-Audit,Code*,Program*,Title*,Audit Captains*,Status,,,,,,,,,,
+Audit,Code*,Program*,Title*,Audit Captains*,State,,,,,,,,,,
 ,Audit,Program,Audit,user@example.com,Planned,,,,,,,,,,
 ,,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,,

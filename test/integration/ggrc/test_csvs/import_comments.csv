@@ -8,7 +8,7 @@ Assessment,Code*,Audit*,Title*,Description,Notes,State*,Assignees*,Creators*,Rec
 ,Assessment 6,Audit,Assessment title 6,,,Not Started,user@example.com,user@example.com,,,,,"a normal comment with {} characters",
 ,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,
-Audit,Code*,Program*,Title*,Audit Captains*,Status,,,,,,,,,
+Audit,Code*,Program*,Title*,Audit Captains*,State,,,,,,,,,
 ,Audit,Program,Audit,user@example.com,Planned,,,,,,,,,
 ,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,

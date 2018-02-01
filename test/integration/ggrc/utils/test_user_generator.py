@@ -129,7 +129,7 @@ class TestUserGenerator(TestCase):
           ("Program*", program.slug),
           ("Auditors", "cbabbage@example.com"),
           ("Title", "Title"),
-          ("Status", "Planned"),
+          ("State", "Planned"),
           ("Audit Captains", "aturing@example.com")
       ]))
       audit = Audit.query.filter(Audit.slug == audit_slug).first()

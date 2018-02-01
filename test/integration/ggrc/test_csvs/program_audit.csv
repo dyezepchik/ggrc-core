@@ -17,7 +17,7 @@ user12@example.com
 ,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,
 Object type,"Must be unique. Can be left empty for autogeneration. If updating or deleting, code is required",Mandatory field,,,Mapping is mandatory as Audit needs to be associated with some Program,"For a new audit, Status is always 'planned' by default",,,,,,,,,
-Audit,code*,title*,description,Audit Captains*,Program*,Status,Planned Start Date,Planned End Date,Auditors,evidence url,evidence file,,,,
+Audit,code*,title*,description,Audit Captains*,Program*,State,Planned Start Date,Planned End Date,Auditors,evidence url,evidence file,,,,
 ,Aud-1,Aud-1,test,user1@example.com,prog-1,Planned,7/1/2015,7/15/2015,user2@example.com,http://i.imgur.com/Lppr247.jpg,"http://i.imgur.com/Lppr247.jpg evidence 啕 title 1
 http://i.imgur.com/qA0l5tb.gifv some title 2",,,,
 ,Aud-2,Aud-2,test,user1@example.com,prog-2,Planned,7/1/2015,7/15/2015,user2@example.com,http://i.imgur.com/Lppr347.jpg,http://i.imgur.com/Lppr547.jpg Some title 3,,,,

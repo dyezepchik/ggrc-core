@@ -57,7 +57,7 @@ class TestAuditsImport(TestCase):
       resp = self.import_data(collections.OrderedDict([
           ("object_type", "Audit"),
           ("code", audit.slug),
-          ("Status", "Deprecated"),
+          ("State", "Deprecated"),
       ]))
 
     result_audit = models.Audit.query.get(audit.id)
@@ -94,7 +94,7 @@ class TestAuditsImport(TestCase):
       resp = self.import_data(collections.OrderedDict([
           ("object_type", "Audit"),
           ("code", audit.slug),
-          ("Status", "Deprecated"),
+          ("State", "Deprecated"),
           ("Last Deprecated Date", "02/25/2017"),
       ]))
 
