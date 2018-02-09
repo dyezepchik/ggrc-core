@@ -16,6 +16,8 @@ color
 # All declared_attr properties that are class level as per sqlalchemy
 # documentatio, are reported as false positives by pylint.
 
+from datetime import datetime
+
 from logging import getLogger
 
 from sqlalchemy import orm
@@ -158,7 +160,7 @@ class ChangeTracked(object):
     column = db.Column(
         db.DateTime,
         nullable=False,
-        default=db.text('current_timestamp'),
+        default=lambda: datetime.utcnow().replace(microsecond=0).isoformat(),
     )
     return column
 
@@ -168,8 +170,8 @@ class ChangeTracked(object):
     column = db.Column(
         db.DateTime,
         nullable=False,
-        default=db.text('current_timestamp'),
-        onupdate=db.text('current_timestamp'),
+        default=lambda: datetime.utcnow().replace(microsecond=0).isoformat(),
+        onupdate=lambda: datetime.utcnow().replace(microsecond=0).isoformat(),
     )
     return column
 
