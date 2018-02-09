@@ -79,7 +79,7 @@ class HasOwnContext(object):
     if name is None:
       name = '{object_type} Context {timestamp}'.format(
           object_type=self.__class__.__name__,
-          timestamp=datetime.datetime.now())
+          timestamp=datetime.datetime.utcnow())
     if description is None:
       description = ''
     new_context = Context(

@@ -307,7 +307,7 @@ def set_notification_sent_time(notif_list):
       to modify sent_at field.
   """
   for notif in notif_list:
-    notif.sent_at = datetime.now()
+    notif.sent_at = datetime.utcnow()
   db.session.commit()
 
 

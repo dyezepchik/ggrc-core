@@ -545,8 +545,8 @@ def get_attributes_data(computed_values):
           "value_integer": computed_value["value_integer"],
           "attribute_template_id": attr.attribute_template_id,
           "attribute_definition_id": definition_id,
-          "created_at": datetime.datetime.now(),
-          "updated_at": datetime.datetime.now(),
+          "created_at": datetime.datetime.utcnow(),
+          "updated_at": datetime.datetime.utcnow(),
           "created_by_id": user_id,
           "updated_by_id": user_id,
       })

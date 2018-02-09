@@ -530,7 +530,7 @@ class ModelView(View):
         self.modified_attr).order_by(self.modified_attr.desc()).first()
     if result is not None:
       return self.modified_at(result)
-    return datetime.datetime.now()
+    return datetime.datetime.utcnow()
 
   # Routing helpers
   @classmethod
@@ -760,7 +760,7 @@ class Resource(ModelView):
     with benchmark("Deserialize object"):
       self.json_update(obj, src)
     obj.modified_by_id = get_current_user_id()
-    obj.updated_at = datetime.datetime.now()
+    obj.updated_at = datetime.datetime.utcnow()
     db.session.add(obj)
     with benchmark("Query update permissions"):
       new_context = self.get_context_id_from_json(src)
@@ -857,7 +857,7 @@ class Resource(ModelView):
     with benchmark("Send event job"):
       send_event_job(event)
     with benchmark("Make response"):
-      result = self.json_success_response({}, datetime.datetime.now())
+      result = self.json_success_response({}, datetime.datetime.utcnow())
     return result
 
   def has_cache(self):

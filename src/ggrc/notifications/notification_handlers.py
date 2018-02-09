@@ -129,7 +129,7 @@ def _add_assessment_updated_notif(obj):
   if not notification:
     _add_notification(obj, notif_type)
   else:
-    notification.updated_at = datetime.now()
+    notification.updated_at = datetime.utcnow()
     db.session.add(notification)
 
 

@@ -458,7 +458,7 @@ def handle_program_post(sender, obj=None, src=None, service=None):
       context=personal_context,
       name='{object_type} Context {timestamp}'.format(
           object_type=service.model.__name__,
-          timestamp=datetime.datetime.now()),
+          timestamp=datetime.datetime.utcnow()),
       description='',
   )
   context.modified_by = get_current_user()
@@ -516,7 +516,7 @@ def create_audit_context(audit):
   context = audit.build_object_context(
       context=audit.context,
       name='Audit Context {timestamp}'.format(
-          timestamp=datetime.datetime.now()),
+          timestamp=datetime.datetime.utcnow()),
       description='',
   )
   context.modified_by = get_current_user()

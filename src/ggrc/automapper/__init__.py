@@ -137,7 +137,7 @@ class AutomapperGenerator(object):
       )
       automapping_id = automapping_result.inserted_primary_key[0]
       self.automapping_ids.add(automapping_id)
-      now = datetime.now()
+      now = datetime.utcnow()
       # We are doing an INSERT IGNORE INTO here to mitigate a race condition
       # that happens when multiple simultaneous requests create the same
       # automapping. If a relationship object fails our unique constraint

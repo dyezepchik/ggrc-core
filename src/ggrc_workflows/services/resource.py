@@ -63,4 +63,4 @@ class CycleTaskResource(common.Resource):
                      if int(item["id"]) not in updated_ids}
       result = [{'status': 'updated', 'id': idx} for idx in updated_ids]
       result.extend([{'status': 'skipped', 'id': idx} for idx in skipped_ids])
-      return self.json_success_response(result, datetime.datetime.now())
+      return self.json_success_response(result, datetime.datetime.utcnow())

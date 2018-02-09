@@ -550,7 +550,7 @@ def init_hook():  # noqa
         comment, other = other, comment
 
       if isinstance(other, (Commentable, ChangeTracked)):
-        other.updated_at = datetime.now()
+        other.updated_at = datetime.utcnow()
 
   sa.event.listen(sa.orm.session.Session, "before_flush",
                   handle_new_audit_issue_mapping)

@@ -278,7 +278,7 @@ def _insert_program_relationships(relationship_stubs):
   if not relationship_stubs:
     return
   current_user_id = get_current_user_id()
-  now = datetime.now()
+  now = datetime.utcnow()
   # We are doing an INSERT IGNORE INTO here to mitigate a race condition
   # that happens when multiple simultaneous requests create the same
   # automapping. If a relationship object fails our unique constraint

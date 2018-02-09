@@ -56,7 +56,7 @@ def update_acr(role, model, **kwargs):
       column('default_to_current_user', sa.Boolean()),
       column('non_editable', sa.Boolean()),
   )
-  now = datetime.now()
+  now = datetime.utcnow()
   update_dict = dict(id=acr_id, name=role, object_type=model,
                      created_at=now, updated_at=now)
   update_dict.update(kwargs)

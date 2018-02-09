@@ -51,7 +51,7 @@ def apply_proposal(
   if not is_status_changed_to(obj.STATES.APPLIED, obj):
     return
   current_user = login.get_current_user()
-  now = datetime.datetime.now()
+  now = datetime.datetime.utcnow()
   obj.applied_by = current_user
   obj.apply_datetime = now
   if applier.apply_action(obj.instance, obj.content):
@@ -67,7 +67,7 @@ def decline_proposal(
   if not is_status_changed_to(obj.STATES.DECLINED, obj):
     return
   obj.declined_by = login.get_current_user()
-  obj.decline_datetime = datetime.datetime.now()
+  obj.decline_datetime = datetime.datetime.utcnow()
   add_comment_about(obj, obj.STATES.DECLINED, obj.decline_reason)
 
 

@@ -226,7 +226,7 @@ def send_notification():
         body="",
         html=html,
     )
-  now = datetime.datetime.now()
+  now = datetime.datetime.utcnow()
   for proposal in proposals:
     proposal.proposed_notified_datetime = now
   db.session.commit()

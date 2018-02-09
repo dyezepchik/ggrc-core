@@ -18,7 +18,7 @@ def init_hook():
   def handle_cad_delete(sender, obj, src=None, service=None):
     """Make sure create revision after deleting CAD from admin panel"""
     # pylint: disable=unused-argument
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     current_user_id = get_current_user_id()
     for model in all_models.all_models:
       if model._inflector.table_singular != obj.definition_type:
