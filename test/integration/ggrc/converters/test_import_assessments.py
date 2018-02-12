@@ -518,25 +518,19 @@ class TestAssessmentImport(TestCase):
 
   @ddt.data(
       (
-          "Last Updated Date",
-          lambda: datetime.date.today() - datetime.timedelta(7),
-      ),
-      (
           "Created Date",
           lambda: datetime.date.today() - datetime.timedelta(7),
       ),
   )
   @ddt.unpack
   def test_update_non_changeable_field(self, field, value_creator):
-    "Test for creation assessment with unchangeable fields"
+    """Test importing Assessment's "Created Date" field"""
     slug = "TestAssessment"
     with factories.single_commit():
       value = value_creator()
       factories.AssessmentFactory(
           slug=slug,
           modified_by=factories.PersonFactory(email="modifier@email.com"),
-          updated_at=datetime.date.today(),
-          created_at=datetime.date.today(),
       )
     data = [{
         "object_name": "Assessment",
