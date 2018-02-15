@@ -117,7 +117,7 @@ class TestAssessmentImport(TestCase):
     self._test_assessment_users(asmt_2, users)
     self.assertEqual(asmt_2.status, models.Assessment.PROGRESS_STATE)
 
-    audit = [obj for obj in asmt_1.related_objects() if obj.type == "Audit"][0]
+    audit = asmt_1.related_objects(_types="Audit").pop()
     self.assertEqual(audit.context, asmt_1.context)
 
     evidence = models.Document.query.filter_by(title="some title 2").first()
