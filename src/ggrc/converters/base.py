@@ -107,9 +107,8 @@ class Converter(object):
     self.drop_cache()
 
   def handle_priority_columns(self):
-    for attr_name in self.priority_columns:
-      for block_converter in self.block_converters:
-        block_converter.handle_row_data(attr_name)
+    for block_converter in self.block_converters:
+      block_converter.handle_row_data(self.priority_columns)
 
   def row_converters_from_csv(self):
     for converter in self.block_converters:
