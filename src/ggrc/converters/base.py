@@ -54,6 +54,10 @@ class Converter(object):
       "audit",
   ]
 
+  secondary_objects = [
+      "comments",
+  ]
+
   def __init__(self, **kwargs):
     self.dry_run = kwargs.get("dry_run", True)
     self.csv_data = kwargs.get("csv_data", [])
@@ -102,13 +106,14 @@ class Converter(object):
     self.row_converters_from_csv()
     self.handle_priority_columns()
     self.import_objects()
+    self.import_mapped_objects()
     self.import_secondary_objects()
     self._start_compute_attributes_job()
     self.drop_cache()
 
   def handle_priority_columns(self):
     for block_converter in self.block_converters:
-      block_converter.handle_row_data(self.priority_columns)
+      block_converter.handle_row_data(field_list=self.priority_columns)
 
   def row_converters_from_csv(self):
     for converter in self.block_converters:
@@ -159,13 +164,24 @@ class Converter(object):
     self.block_converters.sort(key=lambda x: order[x.name])
 
   def import_objects(self):
+    """Import objects with their primary attributes"""
     for converter in self.block_converters:
-      converter.handle_row_data()
+      converter.handle_row_data(ignore_list=self.secondary_objects)
       converter.import_objects()
 
-  def import_secondary_objects(self):
+  def import_mapped_objects(self):
+    """Import objects' mappings"""
     for converter in self.block_converters:
-      converter.import_secondary_objects()
+      converter.import_mapped_objects()
+
+  def import_secondary_objects(self):
+    """Import object which need to be imported after all mappings and other
+    objects"""
+    for converter in self.block_converters:
+      converter.handle_secondary_objects_data(
+          field_list=self.secondary_objects)
+      converter.import_secondary_objects(
+          field_list=self.secondary_objects)
 
   def get_info(self):
     for converter in self.block_converters:

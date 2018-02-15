@@ -468,23 +468,29 @@ class BlockConverter(object):
       csv_body.append(row_converter.to_array(self.fields))
     return csv_header, csv_body
 
-  def handle_row_data(self, field_list=None):
+  def handle_row_data(self, field_list=None, ignore_list=None):
     """Handle row data for all row converters on import.
 
     Note: When field_list is set, we are handling priority columns and we
     don't have all the data needed for checking mandatory and duplicate values.
 
     Args:
-      filed_list (list of strings): list of fields that should be handled by
-        row converters. This is used only for handling priority columns.
+      field_list (list of strings): list of fields which should be handled
+      by row converters. This is used only for handling priority columns.
     """
     if self.ignore:
       return
     for row_converter in self.row_converters:
-      row_converter.handle_row_data(field_list)
+      row_converter.handle_row_data(field_list, ignore_list)
     if field_list is None:
       self.check_mandatory_fields()
       self.check_unique_columns()
+
+  def handle_secondary_objects_data(self, field_list):
+    if self.ignore:
+      return
+    for row_converter in self.row_converters:
+      row_converter.handle_row_data(field_list)
 
   def check_mandatory_fields(self):
     for row_converter in self.row_converters:
@@ -530,18 +536,18 @@ class BlockConverter(object):
 
     return info
 
-  def import_secondary_objects(self):
+  def import_mapped_objects(self):
     """Import secondary objects procedure."""
     for row_converter in self.row_converters:
-      row_converter.setup_secondary_objects()
+      row_converter.setup_mapped_objects()
 
     for row_converter in self.row_converters:
-      self._check_secondary_object(row_converter)
+      self._check_mapped_object(row_converter)
 
     if not self.converter.dry_run:
       for row_converter in self.row_converters:
         try:
-          row_converter.insert_secondary_objects()
+          row_converter.insert_mapped_objects()
         except exc.SQLAlchemyError as err:
           db.session.rollback()
           logger.exception("Import failed with: %s", err.message)
@@ -588,6 +594,16 @@ class BlockConverter(object):
       import_event = self.save_import()
       for row_converter in self.row_converters:
         row_converter.send_post_commit_signals(event=import_event)
+
+  def import_secondary_objects(self, field_list):
+    if self.ignore:
+      return
+    for row_converter in self.row_converters:
+      row_converter.setup_secondary_objects(field_list)
+
+    if not self.converter.dry_run:
+      db.session.flush()
+      self.save_import()
 
   def clean_session_from_ignored_objs(self):
     """Clean DB session from ignored objects.
@@ -749,7 +765,7 @@ class BlockConverter(object):
       checker(row_converter)
 
   @staticmethod
-  def _check_secondary_object(row_converter):
+  def _check_mapped_object(row_converter):
     """Check secondary object if it has any pre commit checks.
 
     The check functions can mutate the row_converter object and mark it

@@ -62,9 +62,11 @@ class RowConverter(object):
     message = template.format(line=self.line, **kwargs)
     self.block_converter.row_warnings.append(message)
 
-  def handle_csv_row_data(self, field_list=None):
+  def handle_csv_row_data(self, field_list=None, ignore_list=None):
     """ Pack row data with handlers """
-    handle_fields = self.headers if field_list is None else field_list
+    handle_fields = list(set(self.headers) -
+                         (set(ignore_list) if ignore_list else set()))\
+        if field_list is None else field_list
     for i, (attr_name, header_dict) in enumerate(self.headers.items()):
       if attr_name not in handle_fields or \
               attr_name in self.attrs or \
@@ -97,9 +99,9 @@ class RowConverter(object):
       else:
         self.objects[attr_name] = item
 
-  def handle_row_data(self, field_list=None):
+  def handle_row_data(self, field_list=None, ignore_list=None):
     """Handle row data on import"""
-    self.handle_csv_row_data(field_list)
+    self.handle_csv_row_data(field_list, ignore_list)
 
   def check_mandatory_fields(self):
     """Check if the new object contains all mandatory columns."""
@@ -171,7 +173,7 @@ class RowConverter(object):
       self.add_error(errors.PERMISSION_ERROR)
     return obj
 
-  def setup_secondary_objects(self):
+  def setup_mapped_objects(self):
     """Import secondary objects.
 
     This function creates and stores all secondary object such as relationships
@@ -193,9 +195,18 @@ class RowConverter(object):
     """
     if self.ignore:
       return
-
     for item_handler in self.attrs.values():
       if not item_handler.view_only:
+        item_handler.set_obj_attr()
+
+  def setup_secondary_objects(self, field_list=None):
+    """Set the object values of secondary objects (those which need to be
+    imported after mappings"""
+    if self.ignore:
+      return
+    for field in field_list:
+      item_handler = self.attrs.get(field)
+      if item_handler:
         item_handler.set_obj_attr()
 
   def send_post_commit_signals(self, event=None):
@@ -271,7 +282,7 @@ class RowConverter(object):
     for handler in self.attrs.values():
       handler.insert_object()
 
-  def insert_secondary_objects(self):
+  def insert_mapped_objects(self):
     """Add additional objects to the current database session.
 
     This is used for adding any extra created objects such as Relationships, to
