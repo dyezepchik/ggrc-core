@@ -35,3 +35,11 @@ class TestCommentsImport(TestCase):
     asst = Assessment.query.filter_by(slug=slug).first()
     comments = [comment.description for comment in asst.comments]
     self.assertEqual(comments, expected_comments)
+
+  def test_author_role_in_comment(self):
+    """Test comment author's role is set correctly on import"""
+    slug = "Assessment 1"
+    asmt = Assessment.query.filter_by(slug=slug).first()
+    comment = asmt.comments[0]
+    self.assertIn("Assignees", comment.assignee_type)
+    self.assertIn("Creators", comment.assignee_type)
