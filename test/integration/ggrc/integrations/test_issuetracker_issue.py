@@ -87,20 +87,39 @@ class TestIssueTrackerIntegration(SnapshotterBaseTestCase):
                                              'type': None,
                                              'severity': u'S3'})
 
-  def test_update_issuetracker_info_on_asmt_import(self):
+  @patch('ggrc.integrations.issues.Client.update_issue')
+  def test_update_issuetracker_info_on_asmt_import(self, mock_update_issue):
     """Test issuetracker issue updated when comment for assessment imported"""
-    iti = factories.IssueTrackerIssueFactory()
-    asmt = iti.issue_tracked_obj
-    asmt_id = asmt.id
-    audit = asmt.audit
-    self.import_data(OrderedDict([
-      ("object_type", "Assessment"),
-      ("Code*", asmt.slug),
-      ("Audit", audit.slug),
-      ("Comments", "Some imported comment"),
-    ]), dry_run=False)
-    asmt = db.session.query(models.Assessment).get(asmt_id)
-    self.assertEqual(asmt.comments[0].description, "Some imported comment")
+    with patch.object(issue_tracker, '_is_issue_tracker_enabled',
+                      return_value=True):
+      iti = factories.IssueTrackerIssueFactory(enabled=True)
+      asmt = iti.issue_tracked_obj
+      asmt_id = asmt.id
+      audit = asmt.audit
+      comment = "Some imported comment"
+      self.import_data(OrderedDict([
+          ("object_type", "Assessment"),
+          ("Code*", asmt.slug),
+          ("Audit", audit.slug),
+          ("Comments", comment),
+      ]), dry_run=False)
+      asmt = db.session.query(models.Assessment).get(asmt_id)
+      self.assertEqual(asmt.comments[0].description, "Some imported comment")
+      mock_update_issue.assert_called_once_with(iti.issue_id,
+                                                {'status': 'ASSIGNED',
+                                                 'priority': None,
+                                                 'type': None,
+                                                 'severity': None,
+                                                 'comment': comment})
+      with patch.object(issues_module.Client, 'update_issue',
+                        return_value=None) as mock_method:
+        utils.sync_issue_tracker_statuses()
+        mock_method.assert_called_once_with(iti.issue_id,
+                                            {'status': 'ASSIGNED',
+                                             'priority': None,
+                                             'type': None,
+                                             'severity': None,
+                                             'comment': comment})
 
 @patch("ggrc.models.hooks.issue_tracker._is_issue_tracker_enabled",
        return_value=True)
