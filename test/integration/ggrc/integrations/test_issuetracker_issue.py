@@ -111,15 +111,7 @@ class TestIssueTrackerIntegration(SnapshotterBaseTestCase):
                                                  'type': None,
                                                  'severity': None,
                                                  'comment': comment})
-      with patch.object(issues_module.Client, 'update_issue',
-                        return_value=None) as mock_method:
-        utils.sync_issue_tracker_statuses()
-        mock_method.assert_called_once_with(iti.issue_id,
-                                            {'status': 'ASSIGNED',
-                                             'priority': None,
-                                             'type': None,
-                                             'severity': None,
-                                             'comment': comment})
+
 
 @patch("ggrc.models.hooks.issue_tracker._is_issue_tracker_enabled",
        return_value=True)
