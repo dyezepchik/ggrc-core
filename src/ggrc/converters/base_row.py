@@ -16,6 +16,7 @@ from ggrc.rbac import permissions
 from ggrc.services import signals
 
 
+# pylint: disable=too-many-public-methods
 class RowConverter(object):
   """Base class for handling row data."""
 
@@ -174,9 +175,9 @@ class RowConverter(object):
     return obj
 
   def setup_mapped_objects(self):
-    """Import secondary objects.
+    """Import mapped objects.
 
-    This function creates and stores all secondary object such as relationships
+    This function creates and stores all mapped object such as relationships
     and any linked object that need the original object to be saved before they
     can be processed. This is usually due to needing the id of the original
     object that is created with a csv import.

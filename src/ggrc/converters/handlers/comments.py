@@ -52,8 +52,8 @@ class CommentColumnHandler(ColumnHandler):
       assignee_type = ",".join(assignee_types) or None
 
       comment = all_models.Comment(description=description,
-                        assignee_type=assignee_type,
-                        modified_by_id=get_current_user_id())
+                                   assignee_type=assignee_type,
+                                   modified_by_id=get_current_user_id())
       db.session.add(comment)
       mapping = all_models.Relationship(source=current_obj,
                                         destination=comment)

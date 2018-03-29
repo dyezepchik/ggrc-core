@@ -537,7 +537,7 @@ class BlockConverter(object):
     return info
 
   def import_mapped_objects(self):
-    """Import secondary objects procedure."""
+    """Import mapped objects procedure."""
     for row_converter in self.row_converters:
       row_converter.setup_mapped_objects()
 
@@ -766,7 +766,7 @@ class BlockConverter(object):
 
   @staticmethod
   def _check_mapped_object(row_converter):
-    """Check secondary object if it has any pre commit checks.
+    """Check mapped object if it has any pre commit checks.
 
     The check functions can mutate the row_converter object and mark it
     to be ignored if there are any errors detected.
