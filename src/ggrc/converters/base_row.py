@@ -65,9 +65,11 @@ class RowConverter(object):
 
   def handle_csv_row_data(self, field_list=None, ignore_list=None):
     """ Pack row data with handlers """
-    handle_fields = list(set(self.headers) -
-                         (set(ignore_list) if ignore_list else set()))\
-        if field_list is None else field_list
+    if field_list is None:
+      handle_fields = list(set(self.headers) -
+                           (set(ignore_list) if ignore_list else set()))
+    else:
+      handle_fields = field_list
     for i, (attr_name, header_dict) in enumerate(self.headers.items()):
       if attr_name not in handle_fields or \
               attr_name in self.attrs or \
@@ -291,8 +293,8 @@ class RowConverter(object):
     """
     if not self.obj or self.ignore or self.is_delete:
       return
-    for secondery_object in self.objects.values():
-      secondery_object.insert_object()
+    for mapped_object in self.objects.values():
+      mapped_object.insert_object()
 
   def to_array(self, fields):
     """Get an array representation of the current row.
